@@ -18,10 +18,14 @@ dependencies:
       - changed-files:
           - any-glob-to-any-file: ["**/poetry.lock", "package-lock.json"]
       - head-branch: ["^dependabot"]
-python:
+go:
   - any:
       - changed-files:
-          - any-glob-to-any-file: ["*.py", "**/*.py"]
+          - any-glob-to-any-file: ["*.go", "go.mod", "go.sum"]
+just:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file: ["Justfile", "*.just"]
 shell:
   - any:
       - changed-files:
