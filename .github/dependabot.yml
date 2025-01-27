@@ -1,0 +1,23 @@
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directories:
+      - "/"
+      - ".github/actions/setup-dependencies"
+      - ".github/actions/local"
+    commit-message:
+      prefix: "deps(github-actions)"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "01:00"
+      timezone: "Europe/London"
+    target-branch: "main"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+          - "minor"
