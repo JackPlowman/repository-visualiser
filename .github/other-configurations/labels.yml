@@ -30,12 +30,18 @@
   name: wontfix
   description: The issue is expected and will not be fixed
 # Languages
+- color: 006B75
+  name: go
+  description: Pull requests that update Go code
 - color: 000000
   name: github_actions
   description: Pull requests that update GitHub Actions code
 - color: 00ff44
   name: shell
   description: Pull requests that update Shell code
+- color: 66A615
+  name: just
+  description: Pull requests that update Just code
 - color: 1900ff
   name: markdown
   description: Pull requests that update Markdown documentation
