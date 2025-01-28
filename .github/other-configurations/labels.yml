@@ -45,6 +45,9 @@
 - color: 1900ff
   name: markdown
   description: Pull requests that update Markdown documentation
+- color: 0373fc
+  name: docker
+  description: Pull requests that update Docker code
 # Components
 - color: ff0073
   name: git_hooks
