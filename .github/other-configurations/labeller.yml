@@ -38,3 +38,7 @@ git_hooks:
   - any:
       - changed-files:
           - any-glob-to-any-file: ["githooks/**"]
+docker:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file: ["Dockerfile"]
