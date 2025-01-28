@@ -1,0 +1,9 @@
+name: "Repository Visualiser"
+description: ""
+author: "Jack Plowman"
+
+runs:
+  using: "docker"
+  image: "./Dockerfile"
+  env:
+    GITHUB_ACTION: "true"
