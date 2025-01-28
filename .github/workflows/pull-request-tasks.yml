@@ -46,3 +46,10 @@ jobs:
           persist-credentials: false
       - name: Dependency Review
         uses: actions/dependency-review-action@v4.5.0
+
+  repository-visualiser:
+    name: Repository Visualiser
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Repository Visualiser
+        uses: jackplowman/repository-visualiser@main
