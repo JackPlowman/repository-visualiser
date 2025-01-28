@@ -1,5 +1,5 @@
 name: "Repository Visualiser"
-description: ""
+description: "Visualise the repository structure"
 author: "Jack Plowman"
 
 runs:
