@@ -7,4 +7,3 @@ runs:
   image: "./Dockerfile"
   env:
     GITHUB_ACTION: "true"
-
