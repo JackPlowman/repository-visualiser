@@ -101,4 +101,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run Repository Visualiser
-        uses: jackplowman/repository-visualiser@${{ github.ref }}
+        uses: ./action.yml
