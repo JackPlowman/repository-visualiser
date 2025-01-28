@@ -101,4 +101,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run Repository Visualiser
-        uses: ./action.yml
+        uses: ./
