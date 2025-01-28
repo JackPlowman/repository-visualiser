@@ -100,5 +100,10 @@ jobs:
     name: Repository Visualiser
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - name: Run Repository Visualiser
         uses: ./
