@@ -193,8 +193,8 @@ func generateSVG(stats []FileStat) string {
 	}
 
 	// Layout so folder circles don’t overlap.
-	svgHeader := `{::nomarkdown} \n <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600">`
-	svgFooter := `</svg> \n {:/}`
+	svgHeader := `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600">`
+	svgFooter := `</svg>`
 	var output strings.Builder
 	output.WriteString(svgHeader)
 
