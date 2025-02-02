@@ -344,6 +344,13 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	if err := exec.Command("git", "checkout", "-B", branch).Run(); err != nil {
 		return "", err
 	}
+	// Configure git with bot credentials.
+	if err := exec.Command("git", "config", "user.name", "github-actions[bot]").Run(); err != nil {
+		return "", err
+	}
+	if err := exec.Command("git", "config", "user.email", "github-actions[bot]@users.noreply.github.com").Run(); err != nil {
+		return "", err
+	}
 	// Create directory for the commit hash.
 	dirPath := commitHash
 	if err := os.MkdirAll(dirPath, 0755); err != nil {
