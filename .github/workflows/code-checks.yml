@@ -33,6 +33,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LINTER_RULES_PATH: .github/super-linter-configurations
           YAML_ERROR_ON_WARNING: true
+          VALIDATE_GO: false
+          VALIDATE_GO_MODULES: false
 
   check-markdown-links:
     name: Check Markdown links
