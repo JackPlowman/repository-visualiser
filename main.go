@@ -8,6 +8,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -30,12 +31,18 @@ func main() {
 	}
 	svgOutput := generateSVG(fileStats)
 	fmt.Println(svgOutput) // or write to a file
+	// Write svg locally as well.
 	err = os.WriteFile("diagram.svg", []byte(svgOutput), 0644)
 	if err != nil {
 		fmt.Println("Error writing SVG file:", err)
 	}
-	// Post PR comment with SVG if running in a pull request.
-	if err := commentOnPR(svgOutput); err != nil {
+	// Push the SVG to branch "repository-visualiser" in a commit-hash directory.
+	svgURL, err := pushSVGToBranch(svgOutput)
+	if err != nil {
+		fmt.Println("Error pushing SVG:", err)
+	}
+	// Post PR comment with link to the SVG if running in a pull request.
+	if err := commentOnPR(svgURL); err != nil {
 		fmt.Println("Error commenting on PR:", err)
 	}
 	writeSummary(languageCountArray)
@@ -324,8 +331,51 @@ func mapToLanguageCountArray(languageCountMap map[string]int) LanguageCountArray
 	return languageCountArray
 }
 
-// commentOnPR posts a comment on the PR that triggered this action, including the SVG rendered as an image.
-func commentOnPR(svgContent string) error {
+// pushSVGToBranch creates (or checks out) branch "repository-visualiser", writes the svg
+// in a directory named with the current commit hash, then commits and pushes it.
+// It returns the URL for the pushed diagram.
+func pushSVGToBranch(svgContent string) (string, error) {
+	commitHash := os.Getenv("GITHUB_SHA")
+	if commitHash == "" {
+		commitHash = "latest"
+	}
+	branch := "repository-visualiser"
+	// Checkout (or create) branch.
+	if err := exec.Command("git", "checkout", "-B", branch).Run(); err != nil {
+		return "", err
+	}
+	// Create directory for the commit hash.
+	dirPath := commitHash
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return "", err
+	}
+	filePath := filepath.Join(dirPath, "diagram.svg")
+	if err := os.WriteFile(filePath, []byte(svgContent), 0644); err != nil {
+		return "", err
+	}
+	// Add, commit and push changes.
+	if err := exec.Command("git", "add", filePath).Run(); err != nil {
+		return "", err
+	}
+	commitMsg := fmt.Sprintf("Update diagram for commit %s", commitHash)
+	if err := exec.Command("git", "commit", "-m", commitMsg).Run(); err != nil {
+		// Allow if there is nothing to commit.
+		fmt.Println("No changes to commit.")
+	}
+	if err := exec.Command("git", "push", "-u", "origin", branch).Run(); err != nil {
+		return "", err
+	}
+	// Construct raw URL for the pushed file.
+	repo := os.Getenv("GITHUB_REPOSITORY")
+	if repo == "" {
+		return "", fmt.Errorf("GITHUB_REPOSITORY not set")
+	}
+	svgURL := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/diagram.svg", repo, branch, commitHash)
+	return svgURL, nil
+}
+
+// commentOnPR posts a comment on the PR that triggered this action, linking the SVG.
+func commentOnPR(svgURL string) error {
 	eventPath := os.Getenv("GITHUB_EVENT_PATH")
 	if eventPath == "" {
 		return nil // Not running in a GitHub Actions event.
@@ -355,9 +405,9 @@ func commentOnPR(svgContent string) error {
 		return fmt.Errorf("GITHUB_TOKEN not set")
 	}
 	commentURL := fmt.Sprintf("https://api.github.com/repos/%s/issues/%d/comments", repo, event.PullRequest.Number)
-	// Wrap SVG in an <img> tag with content inline.
+	// Link the pushed diagram.svg.
 	bodyData := map[string]string{
-		"body": fmt.Sprintf("## Repository Visualiser\n<img src='data:image/svg+xml;ascii,%s' />", svgContent),
+		"body": fmt.Sprintf("## Repository Visualiser\n![Diagram](%s)", svgURL),
 	}
 	postBody, err := json.Marshal(bodyData)
 	if err != nil {
