@@ -79,12 +79,10 @@ func writeSummary(languageCountArray LanguageCountArray, svgContent string) {
 		sb.WriteString("|---------|" + strings.Repeat("---------|", len(headers)) + "\n")
 		// Data row with left cell "Files".
 		sb.WriteString("| Files   | " + strings.Join(counts, " | ") + " |\n")
-
+		// SVG content.
 		sb.WriteString("\n\n")
-
 		sb.WriteString(svgContent)
-
-		fmt.Fprintln(file, sb.String())
+		sb.WriteString("\n\n")
 	}
 }
 
