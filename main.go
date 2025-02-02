@@ -333,16 +333,28 @@ func mapToLanguageCountArray(languageCountMap map[string]int) LanguageCountArray
 
 // pushSVGToBranch creates (or checks out) branch "repository-visualiser", writes the svg
 // in a directory named with the current commit hash, then commits and pushes it.
-// It returns the URL for the pushed diagram.
+// This version retains existing commits.
 func pushSVGToBranch(svgContent string) (string, error) {
 	commitHash := os.Getenv("GITHUB_SHA")
 	if commitHash == "" {
 		commitHash = "latest"
 	}
 	branch := "repository-visualiser"
-	// Checkout (or create) branch.
-	if err := exec.Command("git", "checkout", "-B", branch).Run(); err != nil {
+	// Check if the branch exists.
+	out, err := exec.Command("git", "branch", "--list", branch).Output()
+	if err != nil {
 		return "", err
+	}
+	if strings.TrimSpace(string(out)) == "" {
+		// Branch does not exist; create it.
+		if err := exec.Command("git", "checkout", "-b", branch).Run(); err != nil {
+			return "", err
+		}
+	} else {
+		// Branch exists; check it out.
+		if err := exec.Command("git", "checkout", branch).Run(); err != nil {
+			return "", err
+		}
 	}
 	// Configure git with bot credentials.
 	if err := exec.Command("git", "config", "user.name", "github-actions[bot]").Run(); err != nil {
@@ -369,7 +381,7 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		// Allow if there is nothing to commit.
 		fmt.Println("No changes to commit.")
 	}
-	if err := exec.Command("git", "push", "-u", "origin", branch).Run(); err != nil {
+	if err := exec.Command("git", "push", "origin", branch).Run(); err != nil {
 		return "", err
 	}
 	// Construct raw URL for the pushed file.
