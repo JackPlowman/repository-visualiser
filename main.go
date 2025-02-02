@@ -35,7 +35,7 @@ func main() {
 }
 
 // writeSummary writes the language count array to the GitHub Action summary if available.
-func writeSummary(languageCountArray LanguageCountArray) {
+func writeSummary(languageCountArray LanguageCountArray, svgContent string) {
 	actionSummaryPath := os.Getenv("GITHUB_STEP_SUMMARY")
 	if actionSummaryPath != "" {
 		// Separate unknown language count.
@@ -79,6 +79,10 @@ func writeSummary(languageCountArray LanguageCountArray) {
 		sb.WriteString("|---------|" + strings.Repeat("---------|", len(headers)) + "\n")
 		// Data row with left cell "Files".
 		sb.WriteString("| Files   | " + strings.Join(counts, " | ") + " |\n")
+
+		sb.WriteString("\n\n")
+
+		sb.WriteString(svgContent)
 
 		fmt.Fprintln(file, sb.String())
 	}
