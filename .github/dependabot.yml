@@ -21,7 +21,7 @@ updates:
         update-types:
           - "patch"
           - "minor"
-          
+
   - package-ecosystem: "docker"
     directory: "/"
     commit-message:
@@ -32,4 +32,3 @@ updates:
       time: "01:00"
       timezone: "Europe/London"
     target-branch: "main"
-    
