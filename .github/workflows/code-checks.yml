@@ -109,3 +109,6 @@ jobs:
           persist-credentials: false
       - name: Run Repository Visualiser
         uses: ./
+        with:
+          repository: ${{ github.repository }}
+          github_token: ${{ github.token }}

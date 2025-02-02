@@ -2,9 +2,17 @@ name: "Repository Visualiser"
 description: "Visualise the repository structure"
 author: "Jack Plowman"
 
+inputs:
+  repository:
+    description: "The repository to visualise"
+    required: true
+  github_token:
+    description: "The GitHub token to use"
+    required: true
+
 runs:
   using: "docker"
   image: "./Dockerfile"
   env:
     GITHUB_ACTION: "true"
-    GITHUB_TOKEN: ${{ github.token }} }}
+    GITHUB_TOKEN: ${{ inputs.github_token }}
