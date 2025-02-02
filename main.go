@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
@@ -30,6 +33,10 @@ func main() {
 	err = os.WriteFile("diagram.svg", []byte(svgOutput), 0644)
 	if err != nil {
 		fmt.Println("Error writing SVG file:", err)
+	}
+	// Post PR comment with SVG if running in a pull request.
+	if err := commentOnPR(svgOutput); err != nil {
+		fmt.Println("Error commenting on PR:", err)
 	}
 	writeSummary(languageCountArray)
 }
@@ -315,4 +322,61 @@ func mapToLanguageCountArray(languageCountMap map[string]int) LanguageCountArray
 		languageCountArray = append(languageCountArray, LanguageCount{Language: language, Count: count})
 	}
 	return languageCountArray
+}
+
+// commentOnPR posts a comment on the PR that triggered this action, including the SVG content.
+func commentOnPR(svgContent string) error {
+	eventPath := os.Getenv("GITHUB_EVENT_PATH")
+	if eventPath == "" {
+		return nil // Not running in a GitHub Actions event.
+	}
+	eventData, err := ioutil.ReadFile(eventPath)
+	if err != nil {
+		return err
+	}
+	var event struct {
+		PullRequest struct {
+			Number int `json:"number"`
+		} `json:"pull_request"`
+	}
+	if err := json.Unmarshal(eventData, &event); err != nil {
+		return err
+	}
+	// If not a PR event, do nothing.
+	if event.PullRequest.Number == 0 {
+		return nil
+	}
+	repo := os.Getenv("GITHUB_REPOSITORY")
+	if repo == "" {
+		return fmt.Errorf("GITHUB_REPOSITORY not set")
+	}
+	githubToken := os.Getenv("GITHUB_TOKEN")
+	if githubToken == "" {
+		return fmt.Errorf("GITHUB_TOKEN not set")
+	}
+	commentURL := fmt.Sprintf("https://api.github.com/repos/%s/issues/%d/comments", repo, event.PullRequest.Number)
+	bodyData := map[string]string{
+		"body": fmt.Sprintf("## Repository Visualiser\n````svg\n%s\n````", svgContent),
+	}
+	postBody, err := json.Marshal(bodyData)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequest("POST", commentURL, bytes.NewBuffer(postBody))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Bearer "+githubToken)
+	req.Header.Set("Accept", "application/vnd.github+json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 300 {
+		respBody, _ := ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("failed to post comment: %s", respBody)
+	}
+	return nil
 }
