@@ -42,9 +42,24 @@ func writeSummary(languageCountArray LanguageCountArray) {
 			return
 		}
 		defer file.Close()
+
+		// Build markdown table with language names as headers and file counts as body,
+		// with a left column titled "Files".
+		var headers, counts []string
 		for _, lc := range languageCountArray {
-			fmt.Fprintf(file, "%s: %d\n", lc.Language, lc.Count)
+			headers = append(headers, lc.Language)
+			counts = append(counts, fmt.Sprintf("%d", lc.Count))
 		}
+
+		var sb strings.Builder
+		// Header row with empty left cell.
+		sb.WriteString("|         | " + strings.Join(headers, " | ") + " |\n")
+		// Separator row.
+		sb.WriteString("|---------|" + strings.Repeat("---------|", len(headers)) + "\n")
+		// Data row with left cell "Files".
+		sb.WriteString("| Files   | " + strings.Join(counts, " | ") + " |\n")
+
+		fmt.Fprintln(file, sb.String())
 	}
 }
 
