@@ -1,14 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
