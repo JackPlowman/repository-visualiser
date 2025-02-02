@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/go-enry/go-enry/v2"
@@ -36,6 +37,11 @@ func main() {
 func writeSummary(languageCountArray LanguageCountArray) {
 	actionSummaryPath := os.Getenv("GITHUB_STEP_SUMMARY")
 	if actionSummaryPath != "" {
+		// Sort array by descending count.
+		sort.Slice(languageCountArray, func(i, j int) bool {
+			return languageCountArray[i].Count > languageCountArray[j].Count
+		})
+
 		file, err := os.OpenFile(actionSummaryPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			fmt.Println("Error:", err)
