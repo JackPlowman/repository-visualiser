@@ -83,6 +83,10 @@ func writeSummary(languageCountArray LanguageCountArray, svgContent string) {
 		sb.WriteString("\n\n")
 		sb.WriteString(svgContent)
 		sb.WriteString("\n\n")
+
+		if _, err := fmt.Fprintln(file, sb.String()); err != nil {
+			fmt.Println("Error writing to summary file:", err)
+		}
 	}
 }
 
