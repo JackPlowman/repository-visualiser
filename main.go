@@ -37,10 +37,32 @@ func main() {
 func writeSummary(languageCountArray LanguageCountArray) {
 	actionSummaryPath := os.Getenv("GITHUB_STEP_SUMMARY")
 	if actionSummaryPath != "" {
-		// Sort array by descending count.
-		sort.Slice(languageCountArray, func(i, j int) bool {
-			return languageCountArray[i].Count > languageCountArray[j].Count
+		// Separate unknown language count.
+		var unknownCount int
+		var knownCounts LanguageCountArray
+		for _, lc := range languageCountArray {
+			if lc.Language == "Unknown" {
+				unknownCount += lc.Count
+			} else {
+				knownCounts = append(knownCounts, lc)
+			}
+		}
+		// Sort known counts by descending file count.
+		sort.Slice(knownCounts, func(i, j int) bool {
+			return knownCounts[i].Count > knownCounts[j].Count
 		})
+
+		// Build headers and counts.
+		var headers, counts []string
+		for _, lc := range knownCounts {
+			headers = append(headers, lc.Language)
+			counts = append(counts, fmt.Sprintf("%d", lc.Count))
+		}
+		// Append unknown column if found.
+		if unknownCount > 0 {
+			headers = append(headers, "Unknown")
+			counts = append(counts, fmt.Sprintf("%d", unknownCount))
+		}
 
 		file, err := os.OpenFile(actionSummaryPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
@@ -48,14 +70,6 @@ func writeSummary(languageCountArray LanguageCountArray) {
 			return
 		}
 		defer file.Close()
-
-		// Build markdown table with language names as headers and file counts as body,
-		// with a left column titled "Files".
-		var headers, counts []string
-		for _, lc := range languageCountArray {
-			headers = append(headers, lc.Language)
-			counts = append(counts, fmt.Sprintf("%d", lc.Count))
-		}
 
 		var sb strings.Builder
 		// Header row with empty left cell.
