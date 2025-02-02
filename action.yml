@@ -7,3 +7,4 @@ runs:
   image: "./Dockerfile"
   env:
     GITHUB_ACTION: "true"
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }}
