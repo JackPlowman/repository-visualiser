@@ -31,7 +31,7 @@ func main() {
 	if err != nil {
 		fmt.Println("Error writing SVG file:", err)
 	}
-	writeSummary(languageCountArray)
+	writeSummary(languageCountArray, svgOutput)
 }
 
 // writeSummary writes the language count array to the GitHub Action summary if available.
