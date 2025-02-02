@@ -293,6 +293,9 @@ func recursiveFileSearch(root string) LanguageCountArray {
 				return err
 			}
 			language := enry.GetLanguage(path, content)
+			if language == "" {
+				language = "Unknown"
+			}
 			languageCountMap[language]++
 		}
 		return nil
