@@ -324,7 +324,7 @@ func mapToLanguageCountArray(languageCountMap map[string]int) LanguageCountArray
 	return languageCountArray
 }
 
-// commentOnPR posts a comment on the PR that triggered this action, including the SVG content.
+// commentOnPR posts a comment on the PR that triggered this action, including the SVG rendered as an image.
 func commentOnPR(svgContent string) error {
 	eventPath := os.Getenv("GITHUB_EVENT_PATH")
 	if eventPath == "" {
@@ -355,8 +355,9 @@ func commentOnPR(svgContent string) error {
 		return fmt.Errorf("GITHUB_TOKEN not set")
 	}
 	commentURL := fmt.Sprintf("https://api.github.com/repos/%s/issues/%d/comments", repo, event.PullRequest.Number)
+	// Wrap SVG in an <img> tag with content inline.
 	bodyData := map[string]string{
-		"body": fmt.Sprintf("## Repository Visualiser\n%s\n`", svgContent),
+		"body": fmt.Sprintf("## Repository Visualiser\n<img src='data:image/svg+xml;ascii,%s' />", svgContent),
 	}
 	postBody, err := json.Marshal(bodyData)
 	if err != nil {
