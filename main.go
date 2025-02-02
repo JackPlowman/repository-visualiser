@@ -356,7 +356,7 @@ func commentOnPR(svgContent string) error {
 	}
 	commentURL := fmt.Sprintf("https://api.github.com/repos/%s/issues/%d/comments", repo, event.PullRequest.Number)
 	bodyData := map[string]string{
-		"body": fmt.Sprintf("## Repository Visualiser\n````svg\n%s\n````", svgContent),
+		"body": fmt.Sprintf("## Repository Visualiser\n%s\n`", svgContent),
 	}
 	postBody, err := json.Marshal(bodyData)
 	if err != nil {
