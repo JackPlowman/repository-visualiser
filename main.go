@@ -16,7 +16,7 @@ import (
 func main() {
 	languageCountArray := recursiveFileSearch(".")
 	fmt.Println(languageCountArray)
-	writeSummary(languageCountArray)
+
 	fileStats := getFileStats(".")
 	// Apply ignore list filtering.
 	ignoreList, err := loadIgnoreList()
@@ -31,6 +31,7 @@ func main() {
 	if err != nil {
 		fmt.Println("Error writing SVG file:", err)
 	}
+	writeSummary(languageCountArray)
 }
 
 // writeSummary writes the language count array to the GitHub Action summary if available.
