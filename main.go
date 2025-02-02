@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -14,6 +16,8 @@ import (
 	"strings"
 
 	"github.com/go-enry/go-enry/v2"
+	"github.com/google/go-github/v48/github"
+	"golang.org/x/oauth2"
 )
 
 // main is the entry point of the application.
@@ -363,6 +367,7 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	if err := exec.Command("git", "config", "user.email", "github-actions[bot]@users.noreply.github.com").Run(); err != nil {
 		return "", err
 	}
+
 	// Create directory for the commit hash.
 	dirPath := commitHash
 	if err := os.MkdirAll(dirPath, 0755); err != nil {
@@ -393,13 +398,13 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	return svgURL, nil
 }
 
-// commentOnPR posts a comment on the PR that triggered this action, linking the SVG.
+// Updated commentOnPR using go-github.
 func commentOnPR(svgURL string) error {
 	eventPath := os.Getenv("GITHUB_EVENT_PATH")
 	if eventPath == "" {
 		return nil // Not running in a GitHub Actions event.
 	}
-	eventData, err := ioutil.ReadFile(eventPath)
+	eventData, err := os.ReadFile(eventPath)
 	if err != nil {
 		return err
 	}
@@ -411,42 +416,29 @@ func commentOnPR(svgURL string) error {
 	if err := json.Unmarshal(eventData, &event); err != nil {
 		return err
 	}
-	// If not a PR event, do nothing.
 	if event.PullRequest.Number == 0 {
 		return nil
 	}
-	repo := os.Getenv("GITHUB_REPOSITORY")
-	if repo == "" {
-		return fmt.Errorf("GITHUB_REPOSITORY not set")
+	repoFull := os.Getenv("GITHUB_REPOSITORY")
+	if repoFull == "" {
+		return errors.New("GITHUB_REPOSITORY not set")
 	}
-	githubToken := os.Getenv("GITHUB_TOKEN")
-	if githubToken == "" {
-		return fmt.Errorf("GITHUB_TOKEN not set")
+	parts := strings.Split(repoFull, "/")
+	if len(parts) != 2 {
+		return errors.New("invalid GITHUB_REPOSITORY format")
 	}
-	commentURL := fmt.Sprintf("https://api.github.com/repos/%s/issues/%d/comments", repo, event.PullRequest.Number)
-	// Link the pushed diagram.svg.
-	bodyData := map[string]string{
-		"body": fmt.Sprintf("## Repository Visualiser\n![Diagram](%s)", svgURL),
+	owner, repo := parts[0], parts[1]
+	token := os.Getenv("GITHUB_TOKEN")
+	if token == "" {
+		return errors.New("GITHUB_TOKEN not set")
 	}
-	postBody, err := json.Marshal(bodyData)
-	if err != nil {
-		return err
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
+	tc := oauth2.NewClient(ctx, ts)
+	client := github.NewClient(tc)
+	comment := &github.IssueComment{
+		Body: github.String(fmt.Sprintf("## Repository Visualiser\n![Diagram](%s)", svgURL)),
 	}
-	req, err := http.NewRequest("POST", commentURL, bytes.NewBuffer(postBody))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Authorization", "Bearer "+githubToken)
-	req.Header.Set("Accept", "application/vnd.github+json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= 300 {
-		respBody, _ := ioutil.ReadAll(resp.Body)
-		return fmt.Errorf("failed to post comment: %s", respBody)
-	}
-	return nil
+	_, _, err = client.Issues.CreateComment(ctx, owner, repo, event.PullRequest.Number, comment)
+	return err
 }
