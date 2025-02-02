@@ -30,3 +30,14 @@ updates:
       time: "01:00"
       timezone: "Europe/London"
     target-branch: "main"
+
+  - package-ecosystem: "gomod"
+    directory: "/"
+    commit-message:
+      prefix: "deps(go-modules)"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "01:00"
+      timezone: "Europe/London"
+    target-branch: "main"
