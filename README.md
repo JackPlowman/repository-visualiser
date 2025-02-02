@@ -4,9 +4,18 @@
 
 - [Repository Name](#repository-name)
   - [Table of Contents](#table-of-contents)
+  - [Permissions](#permissions)
   - [Contributing](#contributing)
 
 <!-- Add documentation -->
+
+## Permissions
+
+```yaml
+permissions:
+  contents: write
+  pull-requests: write
+```
 
 ## Contributing
 
