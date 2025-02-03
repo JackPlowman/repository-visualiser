@@ -1,8 +1,7 @@
 #checkov:skip=CKV_DOCKER_2
 #checkov:skip=CKV_DOCKER_3
-FROM golang:1.23.5
-
-RUN apt-get install git
+FROM golang:alpine-1.23.5
+RUN apk add git
 
 WORKDIR /app
 
