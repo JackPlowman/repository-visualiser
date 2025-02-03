@@ -350,6 +350,7 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		if err := exec.Command("git", "checkout", "-b", branch).Run(); err != nil {
 			fmt.Println("Error creating branch:", err)
 			return "", err
+		}
 	}
 
 	// Configure git with bot credentials.
