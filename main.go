@@ -359,22 +359,27 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	}
 	// Configure git with bot credentials.
 	if err := exec.Command("git", "config", "user.name", "github-actions").Run(); err != nil {
+		fmt.Println("Error configuring git:", err)
 		return "", err
 	}
 	if err := exec.Command("git", "config", "user.email", "github-actions@github.com").Run(); err != nil {
+		fmt.Println("Error configuring git:", err)
 		return "", err
 	}
 	// Create a directory named with the commit hash.
 	dirPath := commitHash
 	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		fmt.Println("Error creating directory:", err)
 		return "", err
 	}
 	filePath := filepath.Join(dirPath, "diagram.svg")
 	if err := os.WriteFile(filePath, []byte(svgContent), 0644); err != nil {
+		fmt.Println("Error writing SVG file:", err)
 		return "", err
 	}
 	// Stage, commit and push the changes.
 	if err := exec.Command("git", "add", filePath).Run(); err != nil {
+		fmt.Println("Error staging:", err)
 		return "", err
 	}
 	commitMsg := fmt.Sprintf("Update diagram for commit %s", commitHash)
