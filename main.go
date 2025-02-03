@@ -396,6 +396,7 @@ func pushSVGToBranch(svgContent string) (string, error) {
 
 	// svgURL := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/diagram.svg", repo, branch, commitHash)
 	// return svgURL, nil
+	return "", nil
 }
 
 // Updated commentOnPR using go-github.
