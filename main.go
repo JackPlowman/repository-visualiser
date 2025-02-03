@@ -342,7 +342,6 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	}
 	branch := "repository-visualiser"
 	// List branches without inlining environment variables.
-	os.Setenv("GIT_TERMINAL_PROMPT", "0")
 	// Branch exists; check it out.
 	if err := exec.Command("git", "checkout", branch).Run(); err != nil {
 		fmt.Println("Error checking out branch:", err)
@@ -353,15 +352,6 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		}
 	}
 
-	// Configure git with bot credentials.
-	if err := exec.Command("git", "config", "user.name", "github-actions").Run(); err != nil {
-		fmt.Println("Error configuring git:", err)
-		return "", err
-	}
-	if err := exec.Command("git", "config", "user.email", "github-actions@github.com").Run(); err != nil {
-		fmt.Println("Error configuring git:", err)
-		return "", err
-	}
 	// Create a directory named with the commit hash.
 	dirPath := commitHash
 	if err := os.MkdirAll(dirPath, 0755); err != nil {

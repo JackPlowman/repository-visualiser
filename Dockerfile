@@ -6,6 +6,10 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
+RUN \
+  git config --global user.name "github-actions" \
+  git config --global user.email "github-actions@github.com"
+
 WORKDIR /app
 
 COPY go.mod go.sum ./
