@@ -112,6 +112,6 @@ jobs:
           persist-credentials: false
       - name: Run Repository Visualiser
         uses: ./
-        with
+        with:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
