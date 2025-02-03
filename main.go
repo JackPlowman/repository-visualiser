@@ -31,11 +31,11 @@ func main() {
 	if err != nil {
 		fmt.Println("Error writing SVG file:", err)
 	}
-	writeSummary(languageCountArray)
+	writeSummary(languageCountArray, svgOutput)
 }
 
 // writeSummary writes the language count array to the GitHub Action summary if available.
-func writeSummary(languageCountArray LanguageCountArray) {
+func writeSummary(languageCountArray LanguageCountArray, svgString string) {
 	actionSummaryPath := os.Getenv("GITHUB_STEP_SUMMARY")
 	if actionSummaryPath != "" {
 		// Separate unknown language count.
@@ -80,6 +80,7 @@ func writeSummary(languageCountArray LanguageCountArray) {
 		// Data row with left cell "Files".
 		sb.WriteString("| Files   | " + strings.Join(counts, " | ") + " |\n")
 
+		sb.WriteString(fmt.Sprintf("<picture>\n%s </picture>\n", svgString))
 		fmt.Fprintln(file, sb.String())
 	}
 }
