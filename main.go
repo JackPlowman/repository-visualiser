@@ -340,62 +340,61 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	if commitHash == "" {
 		commitHash = "latest"
 	}
-	repo := os.Getenv("GITHUB_REPOSITORY")
-	if repo == "" {
-		return "", fmt.Errorf("GITHUB_REPOSITORY not set")
+	// Create a new directory for the repository.
+	repoDir := "/tmp/repository-visualiser"
+	if err := os.MkdirAll(repoDir, 0755); err != nil {
+		return "", fmt.Errorf("failed to create directory: %w", err)
 	}
-	branch := "repository-visualiser"
-	// Try to switch to the branch.
-	cmd := exec.Command("git", "switch", branch)
-	cmd.Dir = "/github/workspace"
-	if err := cmd.Run(); err != nil {
-		// If exit status is 128, assume branch doesn't exist and create it.
-		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 128 {
-			cmd = exec.Command("git", "checkout", "-b", branch)
-			cmd.Dir = "/github/workspace"
-			if err := cmd.Run(); err != nil {
-				fmt.Println("Error creating branch:", err)
-				return "", err
-			}
-		} else {
-			fmt.Println("Error switching branch:", err)
-			return "", err
-		}
+
+	// Clone the repository.
+	repoURL := os.Getenv("GITHUB_REPOSITORY_URL")
+	if repoURL == "" {
+		return "", errors.New("GITHUB_REPOSITORY_URL not set")
 	}
-	// Remove all files in the branch to ensure only the new SVG is present.
-	if err := exec.Command("git", "rm", "-rf", ".").Run(); err != nil {
-		fmt.Println("Error removing files:", err)
-		return "", err
+	cmd := exec.Command("git", "clone", repoURL, repoDir)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return "", fmt.Errorf("failed to clone repository: %s", output)
 	}
-	// Create a directory named with the commit hash.
-	dirPath := commitHash
-	if err := os.MkdirAll(dirPath, 0755); err != nil {
-		fmt.Println("Error creating directory:", err)
-		return "", err
+
+	// Change to the repository directory.
+	if err := os.Chdir(repoDir); err != nil {
+		return "", fmt.Errorf("failed to change directory: %w", err)
 	}
-	filePath := filepath.Join(dirPath, "diagram.svg")
-	if err := os.WriteFile(filePath, []byte(svgContent), 0644); err != nil {
-		fmt.Println("Error writing SVG file:", err)
-		return "", err
+
+	// Create and checkout the branch.
+	cmd = exec.Command("git", "checkout", "-B", "repository-visualiser")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return "", fmt.Errorf("failed to create or checkout branch: %s", output)
 	}
-	// Stage, commit and push changes.
-	if err := exec.Command("git", "add", filePath).Run(); err != nil {
-		fmt.Println("Error staging:", err)
-		return "", err
+
+	// Create a directory for the commit hash.
+	commitDir := filepath.Join(repoDir, commitHash)
+	if err := os.MkdirAll(commitDir, 0755); err != nil {
+		return "", fmt.Errorf("failed to create commit directory: %w", err)
 	}
-	commitMsg := fmt.Sprintf("Update diagram for commit %s", commitHash)
-	if err := exec.Command("git", "commit", "-m", commitMsg, "--no-gpg-sign").Run(); err != nil {
-		fmt.Println("No changes to commit.")
+
+	// Write the SVG file to the commit directory.
+	svgPath := filepath.Join(commitDir, "diagram.svg")
+	if err := os.WriteFile(svgPath, []byte(svgContent), 0644); err != nil {
+		return "", fmt.Errorf("failed to write SVG file: %w", err)
 	}
-	pushCmd := exec.Command("git", "push", "origin", branch)
-	// Uncomment the following line if you need tracing:
-	// pushCmd.Env = append(os.Environ(), "GIT_TRACE=1", "GIT_CURL_VERBOSE=1")
-	if err := pushCmd.Run(); err != nil {
-		fmt.Println("Error pushing:", err)
-		return "", err
+
+	// Add, commit, and push the changes.
+	cmd = exec.Command("git", "add", ".")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return "", fmt.Errorf("failed to add changes: %s", output)
 	}
-	svgURL := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/diagram.svg", repo, branch, commitHash)
-	return svgURL, nil
+	cmd = exec.Command("git", "commit", "-m", "Add repository visualisation")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return "", fmt.Errorf("failed to commit changes: %s", output)
+	}
+	cmd = exec.Command("git", "push", "-u", "origin", "repository-visualiser")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return "", fmt.Errorf("failed to push changes: %s", output)
+	}
+
+	return fmt.Sprintf("%s/%s/diagram.svg", repoURL, commitHash), nil
+	return "", nil
 }
 
 // Updated commentOnPR using go-github.
