@@ -354,6 +354,7 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		if err != nil {
 			fmt.Println("Error checking out branch:", output)
 		}
+		fmt.Println("Error checking out branch:", output)
 		fmt.Println("Error checking out branch:", err)
 		// Branch does not exist; create it.
 		cmd = exec.Command("git", "checkout", "-b", branch)
