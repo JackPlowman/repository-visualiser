@@ -2,6 +2,8 @@
 #checkov:skip=CKV_DOCKER_3
 FROM golang:1.23.5
 
+RUN apt-get install git
+
 WORKDIR /app
 
 COPY go.mod go.sum ./
