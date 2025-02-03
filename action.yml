@@ -6,11 +6,9 @@ inputs:
   GITHUB_TOKEN:
     description: "The GitHub token to use for the action"
     required: true
-    default: ${{ secrets.GITHUB_TOKEN }}
   GITHUB_REPOSITORY:
     description: "The GitHub repository to use for the action"
     required: true
-    default: ${{ github.repository }}
 
 runs:
   using: "docker"
