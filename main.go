@@ -341,20 +341,18 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		commitHash = "latest"
 	}
 	branch := "repository-visualiser"
-	// Check if the branch exists.
-	out, err := exec.Command("GIT_TRACE=1", "git", "branch", "--list", branch).Output()
+	// List branches without inlining environment variables.
+	out, err := exec.Command("git", "branch", "--list", branch).Output()
 	if err != nil {
 		fmt.Println("Error listing branches:", err)
 		return "", err
 	}
 	if strings.TrimSpace(string(out)) == "" {
-		// Branch does not exist; create it.
 		if err := exec.Command("git", "checkout", "-b", branch).Run(); err != nil {
 			fmt.Println("Error creating branch:", err)
 			return "", err
 		}
 	} else {
-		// Branch exists; check it out.
 		if err := exec.Command("git", "checkout", branch).Run(); err != nil {
 			fmt.Println("Error checking out branch:", err)
 			return "", err
@@ -380,21 +378,23 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		fmt.Println("Error writing SVG file:", err)
 		return "", err
 	}
-	// Stage, commit and push the changes.
+	// Stage, commit and push changes.
 	if err := exec.Command("git", "add", filePath).Run(); err != nil {
 		fmt.Println("Error staging:", err)
 		return "", err
 	}
 	commitMsg := fmt.Sprintf("Update diagram for commit %s", commitHash)
 	if err := exec.Command("git", "commit", "-m", commitMsg, "--no-gpg-sign").Run(); err != nil {
-		// Allow if there is nothing to commit.
 		fmt.Println("No changes to commit.")
 	}
-	if err := exec.Command("GIT_TRACE=1", "GIT_CURL_VERBOSE=1", "git", "push", "origin", branch).Run(); err != nil {
+	// Optionally, to enable tracing, set environment variables via cmd.Env.
+	pushCmd := exec.Command("git", "push", "origin", branch)
+	// Uncomment the following line if you need tracing:
+	// pushCmd.Env = append(os.Environ(), "GIT_TRACE=1", "GIT_CURL_VERBOSE=1")
+	if err := pushCmd.Run(); err != nil {
 		fmt.Println("Error pushing:", err)
 		return "", err
 	}
-	// Construct a raw URL for the pushed file.
 	repo := os.Getenv("GITHUB_REPOSITORY")
 	if repo == "" {
 		return "", fmt.Errorf("GITHUB_REPOSITORY not set")
