@@ -342,7 +342,17 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	}
 	branch := "repository-visualiser"
 	// List branches without inlining environment variables.
-	os.Environ()["GIT_TERMINAL_PROMPT"] = "0"
+	os.Setenv("GIT_TERMINAL_PROMPT", "0")
+	gitExecutable, err := exec.LookPath("git")
+	if err != nil {
+		fmt.Println("Git not found in PATH")
+	} else {
+		gitDir := filepath.Dir(gitExecutable)
+		currentPath := os.Getenv("PATH")
+		if !strings.Contains(currentPath, gitDir) {
+			os.Setenv("PATH", fmt.Sprintf("%s%c%s", gitDir, os.PathListSeparator, currentPath))
+		}
+	}
 	out, err := exec.Command("git", "branch", "--list", branch).Output()
 	if err != nil {
 		fmt.Println("Error listing branches:", err)
