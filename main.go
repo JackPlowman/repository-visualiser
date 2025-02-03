@@ -343,20 +343,15 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	branch := "repository-visualiser"
 	// List branches without inlining environment variables.
 	os.Setenv("GIT_TERMINAL_PROMPT", "0")
-	// Check if branch exists using "rev-parse --verify".
-	if err := exec.Command("git", "rev-parse", "--verify", branch).Run(); err != nil {
-		// Branch doesn't exist; create it.
+	// Branch exists; check it out.
+	if err := exec.Command("git", "checkout", branch).Run(); err != nil {
+		fmt.Println("Error checking out branch:", err)
+		// Branch does not exist; create it.
 		if err := exec.Command("git", "checkout", "-b", branch).Run(); err != nil {
 			fmt.Println("Error creating branch:", err)
 			return "", err
-		}
-	} else {
-		// Branch exists; check it out.
-		if err := exec.Command("git", "checkout", branch).Run(); err != nil {
-			fmt.Println("Error checking out branch:", err)
-			return "", err
-		}
 	}
+
 	// Configure git with bot credentials.
 	if err := exec.Command("git", "config", "user.name", "github-actions").Run(); err != nil {
 		fmt.Println("Error configuring git:", err)
