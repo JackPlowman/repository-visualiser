@@ -347,10 +347,7 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	}
 
 	// Clone the repository.
-	repoURL := os.Getenv("GITHUB_REPOSITORY_URL")
-	if repoURL == "" {
-		return "", errors.New("GITHUB_REPOSITORY_URL not set")
-	}
+	repoURL := fmt.Sprintf("https://github.com/%s", os.Getenv("GITHUB_REPOSITORY"))
 	cmd := exec.Command("git", "clone", repoURL, repoDir)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return "", fmt.Errorf("failed to clone repository: %s", output)
