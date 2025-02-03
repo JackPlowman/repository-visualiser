@@ -342,6 +342,7 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	}
 	branch := "repository-visualiser"
 	// List branches without inlining environment variables.
+	os.Environ()["GIT_TERMINAL_PROMPT"] = "0"
 	out, err := exec.Command("git", "branch", "--list", branch).Output()
 	if err != nil {
 		fmt.Println("Error listing branches:", err)
