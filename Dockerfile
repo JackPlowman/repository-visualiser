@@ -11,6 +11,6 @@ RUN go mod download && go mod verify
 
 COPY *.go ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app
+RUN CGO_ENABLED=0 GOOS=linux go build -o /application
 
-CMD ["/app"]
+CMD ["/application"]
