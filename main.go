@@ -348,12 +348,12 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	// List branches without inlining environment variables.
 	// Branch exists; check it out.
 	cmd := exec.Command("git", "switch", branch)
-	cmd.Dir = "/home/runner/work/repository-visualiser/repository-visualiser"
+	cmd.Dir = "/github/workspace"
 	if err := cmd.Run(); err != nil {
 		fmt.Println("Error checking out branch:", err)
 		// Branch does not exist; create it.
 		cmd = exec.Command("git", "checkout", "-b", branch)
-		cmd.Dir = "/home/runner/work/repository-visualiser/repository-visualiser"
+		cmd.Dir = "/github/workspace"
 		if err := cmd.Run(); err != nil {
 			fmt.Println("Error creating branch:", err)
 			return "", err
