@@ -340,13 +340,21 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	if commitHash == "" {
 		commitHash = "latest"
 	}
+	repo := os.Getenv("GITHUB_REPOSITORY")
+	if repo == "" {
+		return "", fmt.Errorf("GITHUB_REPOSITORY not set")
+	}
 	branch := "repository-visualiser"
 	// List branches without inlining environment variables.
 	// Branch exists; check it out.
-	if err := exec.Command("git", "checkout", branch).Run(); err != nil {
+	cmd := exec.Command("git", "switch", branch)
+	cmd.Dir = fmt.Sprintf("/home/runner/work/%s/%s", repo, repo)
+	if err := cmd.Run(); err != nil {
 		fmt.Println("Error checking out branch:", err)
 		// Branch does not exist; create it.
-		if err := exec.Command("git", "checkout", "-b", branch).Run(); err != nil {
+		cmd = exec.Command("git", "checkout", "-b", branch)
+		cmd.Dir = fmt.Sprintf("/home/runner/work/%s/%s", repo, repo)
+		if err := cmd.Run(); err != nil {
 			fmt.Println("Error creating branch:", err)
 			return "", err
 		}
@@ -380,10 +388,7 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		fmt.Println("Error pushing:", err)
 		return "", err
 	}
-	repo := os.Getenv("GITHUB_REPOSITORY")
-	if repo == "" {
-		return "", fmt.Errorf("GITHUB_REPOSITORY not set")
-	}
+
 	svgURL := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/diagram.svg", repo, branch, commitHash)
 	return svgURL, nil
 }
