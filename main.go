@@ -378,7 +378,7 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		return "", err
 	}
 	commitMsg := fmt.Sprintf("Update diagram for commit %s", commitHash)
-	if err := exec.Command("git", "commit", "-m", commitMsg).Run(); err != nil {
+	if err := exec.Command("git", "commit", "-m", commitMsg, "--no-gpg-sign").Run(); err != nil {
 		// Allow if there is nothing to commit.
 		fmt.Println("No changes to commit.")
 	}
