@@ -1,6 +1,6 @@
 #checkov:skip=CKV_DOCKER_2
 #checkov:skip=CKV_DOCKER_3
-FROM golang:alpine-1.23.5
+FROM golang:1.23.5-alpine
 RUN apk add git
 
 WORKDIR /app
