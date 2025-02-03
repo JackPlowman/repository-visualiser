@@ -22,7 +22,7 @@ func main() {
 	languageCountArray := recursiveFileSearch(".")
 	fmt.Println(languageCountArray)
 
-	fileStats := getFileStats(".")
+	fileStats := getFileStats("/github/workspace")
 	// Apply ignore list filtering.
 	ignoreList, err := loadIgnoreList()
 	if err != nil {
@@ -350,6 +350,10 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	cmd := exec.Command("git", "switch", branch)
 	cmd.Dir = "/github/workspace"
 	if err := cmd.Run(); err != nil {
+		output, err := cmd.Output()
+		if err != nil {
+			fmt.Println("Error checking out branch:", output)
+		}
 		fmt.Println("Error checking out branch:", err)
 		// Branch does not exist; create it.
 		cmd = exec.Command("git", "checkout", "-b", branch)
@@ -360,37 +364,37 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		}
 	}
 
-	// Create a directory named with the commit hash.
-	dirPath := commitHash
-	if err := os.MkdirAll(dirPath, 0755); err != nil {
-		fmt.Println("Error creating directory:", err)
-		return "", err
-	}
-	filePath := filepath.Join(dirPath, "diagram.svg")
-	if err := os.WriteFile(filePath, []byte(svgContent), 0644); err != nil {
-		fmt.Println("Error writing SVG file:", err)
-		return "", err
-	}
-	// Stage, commit and push changes.
-	if err := exec.Command("git", "add", filePath).Run(); err != nil {
-		fmt.Println("Error staging:", err)
-		return "", err
-	}
-	commitMsg := fmt.Sprintf("Update diagram for commit %s", commitHash)
-	if err := exec.Command("git", "commit", "-m", commitMsg, "--no-gpg-sign").Run(); err != nil {
-		fmt.Println("No changes to commit.")
-	}
-	// Optionally, to enable tracing, set environment variables via cmd.Env.
-	pushCmd := exec.Command("git", "push", "origin", branch)
-	// Uncomment the following line if you need tracing:
-	// pushCmd.Env = append(os.Environ(), "GIT_TRACE=1", "GIT_CURL_VERBOSE=1")
-	if err := pushCmd.Run(); err != nil {
-		fmt.Println("Error pushing:", err)
-		return "", err
-	}
+	// // Create a directory named with the commit hash.
+	// dirPath := commitHash
+	// if err := os.MkdirAll(dirPath, 0755); err != nil {
+	// 	fmt.Println("Error creating directory:", err)
+	// 	return "", err
+	// }
+	// filePath := filepath.Join(dirPath, "diagram.svg")
+	// if err := os.WriteFile(filePath, []byte(svgContent), 0644); err != nil {
+	// 	fmt.Println("Error writing SVG file:", err)
+	// 	return "", err
+	// }
+	// // Stage, commit and push changes.
+	// if err := exec.Command("git", "add", filePath).Run(); err != nil {
+	// 	fmt.Println("Error staging:", err)
+	// 	return "", err
+	// }
+	// commitMsg := fmt.Sprintf("Update diagram for commit %s", commitHash)
+	// if err := exec.Command("git", "commit", "-m", commitMsg, "--no-gpg-sign").Run(); err != nil {
+	// 	fmt.Println("No changes to commit.")
+	// }
+	// // Optionally, to enable tracing, set environment variables via cmd.Env.
+	// pushCmd := exec.Command("git", "push", "origin", branch)
+	// // Uncomment the following line if you need tracing:
+	// // pushCmd.Env = append(os.Environ(), "GIT_TRACE=1", "GIT_CURL_VERBOSE=1")
+	// if err := pushCmd.Run(); err != nil {
+	// 	fmt.Println("Error pushing:", err)
+	// 	return "", err
+	// }
 
-	svgURL := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/diagram.svg", repo, branch, commitHash)
-	return svgURL, nil
+	// svgURL := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/diagram.svg", repo, branch, commitHash)
+	// return svgURL, nil
 }
 
 // Updated commentOnPR using go-github.
