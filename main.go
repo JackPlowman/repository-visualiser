@@ -358,10 +358,10 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		}
 	}
 	// Configure git with bot credentials.
-	if err := exec.Command("git", "config", "user.name", "github-actions[bot]").Run(); err != nil {
+	if err := exec.Command("git", "config", "user.name", "github-actions").Run(); err != nil {
 		return "", err
 	}
-	if err := exec.Command("git", "config", "user.email", "github-actions[bot]@users.noreply.github.com").Run(); err != nil {
+	if err := exec.Command("git", "config", "user.email", "github-actions@github.com").Run(); err != nil {
 		return "", err
 	}
 	// Create a directory named with the commit hash.
