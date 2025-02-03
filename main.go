@@ -382,7 +382,7 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		// Allow if there is nothing to commit.
 		fmt.Println("No changes to commit.")
 	}
-	if err := exec.Command("git", "push", "origin", branch).Run(); err != nil {
+	if err := exec.Command("GIT_TRACE=1", "GIT_CURL_VERBOSE=1", "git", "push", "origin", branch).Run(); err != nil {
 		return "", err
 	}
 	// Construct a raw URL for the pushed file.
