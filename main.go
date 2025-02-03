@@ -342,7 +342,7 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	}
 	branch := "repository-visualiser"
 	// Check if the branch exists.
-	out, err := exec.Command("git", "branch", "--list", branch).Output()
+	out, err := exec.Command("GIT_TRACE=1", "git", "branch", "--list", branch).Output()
 	if err != nil {
 		fmt.Println("Error listing branches:", err)
 		return "", err
