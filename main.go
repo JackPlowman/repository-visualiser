@@ -380,7 +380,6 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		return "", fmt.Errorf("failed to change directory: %w", err)
 	}
 
-	// Write the SVG file to the commit directory.
 	output, err := exec.Command("ls", "-a").CombinedOutput()
 	fmt.Println("Output:", string(output))
 	fmt.Println(err)
@@ -394,6 +393,14 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to write SVG file: %w", err)
 	}
+
+	output, err = exec.Command("ls", "-a").CombinedOutput()
+	fmt.Println("Output:", string(output))
+	fmt.Println(err)
+
+	output, err = exec.Command("pwd").CombinedOutput()
+	fmt.Println("Output:", string(output))
+	fmt.Println(err)
 
 	cmd = exec.Command("git", "config", "--global", "user.name", "github-actions")
 	cmd.Run()
