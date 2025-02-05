@@ -47,7 +47,7 @@ func main() {
 // writeDiagram writes the SVG output to a file named "diagram.svg".
 func writeDiagram(svgOutput string) {
 	// Write svg locally.
-	err = os.WriteFile("diagram.svg", []byte(svgOutput), 0644)
+	err := os.WriteFile("diagram.svg", []byte(svgOutput), 0644)
 	if err != nil {
 		fmt.Println("Error writing SVG file:", err)
 	}
