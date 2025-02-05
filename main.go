@@ -376,6 +376,11 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		return "", fmt.Errorf("failed to write SVG file: %w", err)
 	}
 
+	cmd = exec.Command("git", "config", "--global", "user.name", "github-actions")
+	cmd.Run()
+	cmd = exec.Command("git", "config", "--global", "user.email", "github-actions@github.com")
+	cmd.Run()
+
 	// Add, commit, and push the changes.
 	cmd = exec.Command("git", "add", ".")
 	if output, err := cmd.CombinedOutput(); err != nil {
