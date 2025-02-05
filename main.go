@@ -383,16 +383,6 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	// Write the SVG file to the commit directory.
 	writeDiagram(svgContent)
 
-	cmd = exec.Command("ls", "-la")
-	output, err := cmd.CombinedOutput()
-	fmt.Println(string(output))
-	fmt.Println(err)
-
-	cmd = exec.Command("pwd")
-	output, err = cmd.CombinedOutput()
-	fmt.Println(string(output))
-	fmt.Println(err)
-
 	cmd = exec.Command("git", "config", "--global", "user.name", "github-actions")
 	cmd.Run()
 
@@ -404,6 +394,12 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return "", fmt.Errorf("failed to add changes: %s", output)
 	}
+
+	cmd = exec.Command("git", "status", "-s")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return "", fmt.Errorf("failed to add changes: %s", output)
+	}
+
 	cmd = exec.Command("git", "commit", "-m", "Add repository visualisation")
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return "", fmt.Errorf("failed to commit changes: %s", output)
