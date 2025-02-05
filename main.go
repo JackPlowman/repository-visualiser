@@ -383,6 +383,12 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	// Write the SVG file to the commit directory.
 	writeDiagram(svgContent)
 
+	cmd = exec.Command("ls", "-la")
+	cmd.Run()
+
+	cmd = exec.Command("echo", "$PWD")
+	cmd.Run()
+
 	cmd = exec.Command("git", "config", "--global", "user.name", "github-actions")
 	cmd.Run()
 	cmd = exec.Command("git", "config", "--global", "user.email", "github-actions@github.com")
@@ -403,7 +409,6 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	}
 
 	return fmt.Sprintf("%s/%s/diagram.svg", repoURL, commitHash), nil
-	return "", nil
 }
 
 // Updated commentOnPR using go-github.
