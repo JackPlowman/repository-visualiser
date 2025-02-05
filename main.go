@@ -357,7 +357,6 @@ func pushSVGToBranch(svgContent string) (string, error) {
 
 	// Clone the repository.
 	repoURL := "https://github.com/JackPlowman/repository-visualiser"
-
 	cmd := exec.Command("git", "clone", repoURL, repoDir)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return "", fmt.Errorf("failed to clone repository: %s", output)
@@ -380,27 +379,10 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		return "", fmt.Errorf("failed to change directory: %w", err)
 	}
 
-	output, err := exec.Command("ls", "-a").CombinedOutput()
-	fmt.Println("Output:", string(output))
-	fmt.Println(err)
-
-	output, err = exec.Command("pwd").CombinedOutput()
-	fmt.Println("Output:", string(output))
-	fmt.Println(err)
-
-	err = os.WriteFile(
-		filepath.Join(repoDir, commitHash, "diagram.svg"), []byte(svgContent), 0644)
+	err = os.WriteFile(filepath.Join(repoDir, commitHash, "diagram.svg"), []byte(svgContent), 0644)
 	if err != nil {
 		return "", fmt.Errorf("failed to write SVG file: %w", err)
 	}
-
-	output, err = exec.Command("ls", "-a").CombinedOutput()
-	fmt.Println("Output:", string(output))
-	fmt.Println(err)
-
-	output, err = exec.Command("pwd").CombinedOutput()
-	fmt.Println("Output:", string(output))
-	fmt.Println(err)
 
 	cmd = exec.Command("git", "config", "--global", "user.name", "github-actions")
 	cmd.Run()
@@ -410,22 +392,23 @@ func pushSVGToBranch(svgContent string) (string, error) {
 
 	// Add, commit, and push the changes.
 	cmd = exec.Command("git", "add", "-f", "diagram.svg")
-	output, err = cmd.CombinedOutput()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("failed to add changes: %s", output)
 	}
-	fmt.Println("Output:", output)
-
-	cmd = exec.Command("git", "status")
-	output, err = cmd.CombinedOutput()
-	fmt.Println(string(output))
-	fmt.Println(err)
 
 	cmd = exec.Command("git", "commit", "-m", "Add repository visualisation")
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return "", fmt.Errorf("failed to commit changes: %s", output)
 	}
-	cmd = exec.Command("git", "push", "-u", "origin", "repository-visualiser")
+
+	// Use personal access token for authentication.
+	token := os.Getenv("INPUT_GITHUB_TOKEN")
+	if token == "" {
+		return "", errors.New("GITHUB_TOKEN not set")
+	}
+	authURL := fmt.Sprintf("https://%s@github.com/JackPlowman/repository-visualiser.git", token)
+	cmd = exec.Command("git", "push", "-u", authURL, "repository-visualiser")
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return "", fmt.Errorf("failed to push changes: %s", output)
 	}
