@@ -350,16 +350,17 @@ func pushSVGToBranch(svgContent string) (string, error) {
 		return "", fmt.Errorf("failed to create directory: %w", err)
 	}
 
-	// Clone the repository.
-	repoURL := "https://github.com/JackPlowman/repository-visualiser"
-	cmd := exec.Command("git", "clone", repoURL, repoDir)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return "", fmt.Errorf("failed to clone repository: %s", output)
-	}
-
 	// Change to the repository directory.
 	if err := os.Chdir(repoDir); err != nil {
 		return "", fmt.Errorf("failed to change directory: %w", err)
+	}
+
+	// Clone the repository.
+	repoURL := "https://github.com/JackPlowman/repository-visualiser"
+
+	cmd := exec.Command("git", "clone", repoURL, repoDir)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return "", fmt.Errorf("failed to clone repository: %s", output)
 	}
 
 	// Create and checkout the branch.
@@ -372,6 +373,11 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	commitDir := filepath.Join(repoDir, commitHash)
 	if err := os.MkdirAll(commitDir, 0755); err != nil {
 		return "", fmt.Errorf("failed to create commit directory: %w", err)
+	}
+
+	// Change to the repository directory.
+	if err := os.Chdir(commitDir); err != nil {
+		return "", fmt.Errorf("failed to change directory: %w", err)
 	}
 
 	// Write the SVG file to the commit directory.
