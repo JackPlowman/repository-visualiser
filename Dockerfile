@@ -5,10 +5,6 @@ FROM golang:1.23.5-bookworm
 # Install Git
 RUN apt-get update && apt-get install -y git
 
-# Configure Git
-RUN git config --global user.name "github-actions" && \
-    git config --global user.email "github-actions@github.com"
-
 WORKDIR /app
 
 COPY go.mod go.sum ./
