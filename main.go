@@ -384,13 +384,18 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	writeDiagram(svgContent)
 
 	cmd = exec.Command("ls", "-la")
-	cmd.Run()
+	output, err := cmd.CombinedOutput()
+	fmt.Println(string(output))
+	fmt.Println(err)
 
 	cmd = exec.Command("echo", "$PWD")
-	cmd.Run()
+	output, err = cmd.CombinedOutput()
+	fmt.Println(string(output))
+	fmt.Println(err)
 
 	cmd = exec.Command("git", "config", "--global", "user.name", "github-actions")
 	cmd.Run()
+
 	cmd = exec.Command("git", "config", "--global", "user.email", "github-actions@github.com")
 	cmd.Run()
 
