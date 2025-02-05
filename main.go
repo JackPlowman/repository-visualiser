@@ -396,9 +396,9 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	}
 
 	cmd = exec.Command("git", "status", "-s")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return "", fmt.Errorf("failed to add changes: %s", output)
-	}
+	output, err := cmd.CombinedOutput()
+	fmt.Println(string(output))
+	fmt.Println(err)
 
 	cmd = exec.Command("git", "commit", "-m", "Add repository visualisation")
 	if output, err := cmd.CombinedOutput(); err != nil {
