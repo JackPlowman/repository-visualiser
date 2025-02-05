@@ -415,7 +415,7 @@ func commentOnPR(svgURL string) error {
 	if event.PullRequest.Number == 0 {
 		return nil
 	}
-	repoFull := os.Getenv("GITHUB_REPOSITORY")
+	repoFull := os.Getenv("INPUT_GITHUB_REPOSITORY")
 	if repoFull == "" {
 		return errors.New("GITHUB_REPOSITORY not set")
 	}
@@ -424,7 +424,7 @@ func commentOnPR(svgURL string) error {
 		return errors.New("invalid GITHUB_REPOSITORY format")
 	}
 	owner, repo := parts[0], parts[1]
-	token := os.Getenv("GITHUB_TOKEN")
+	token := os.Getenv("INPUT_GITHUB_TOKEN")
 	if token == "" {
 		return errors.New("GITHUB_TOKEN not set")
 	}
