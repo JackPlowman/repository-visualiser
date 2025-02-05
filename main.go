@@ -389,7 +389,8 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	fmt.Println("Output:", string(output))
 	fmt.Println(err)
 
-	err = os.WriteFile("diagram.svg", []byte(svgContent), 0644)
+	err = os.WriteFile(
+		filepath.Join(repoDir, commitHash, "diagram.svg"), []byte(svgContent), 0644)
 	if err != nil {
 		return "", fmt.Errorf("failed to write SVG file: %w", err)
 	}
