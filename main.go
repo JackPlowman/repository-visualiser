@@ -31,12 +31,7 @@ func main() {
 		fileStats = filterIgnoredFiles(fileStats, ignoreList)
 	}
 	svgOutput := generateSVG(fileStats)
-	fmt.Println(svgOutput) // or write to a file
-	// Write svg locally as well.
-	err = os.WriteFile("diagram.svg", []byte(svgOutput), 0644)
-	if err != nil {
-		fmt.Println("Error writing SVG file:", err)
-	}
+
 	// Push the SVG to branch "repository-visualiser" in a commit-hash directory.
 	svgURL, err := pushSVGToBranch(svgOutput)
 	if err != nil {
@@ -47,6 +42,14 @@ func main() {
 		fmt.Println("Error commenting on PR:", err)
 	}
 	writeSummary(languageCountArray)
+}
+
+func writeDiagram(svgOutput string) {
+	// Write svg locally.
+	err = os.WriteFile("diagram.svg", []byte(svgOutput), 0644)
+	if err != nil {
+		fmt.Println("Error writing SVG file:", err)
+	}
 }
 
 // writeSummary writes the language count array to the GitHub Action summary if available.
@@ -371,10 +374,7 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	}
 
 	// Write the SVG file to the commit directory.
-	svgPath := filepath.Join(commitDir, "diagram.svg")
-	if err := os.WriteFile(svgPath, []byte(svgContent), 0644); err != nil {
-		return "", fmt.Errorf("failed to write SVG file: %w", err)
-	}
+	writeDiagram(svgContent)
 
 	cmd = exec.Command("git", "config", "--global", "user.name", "github-actions")
 	cmd.Run()
