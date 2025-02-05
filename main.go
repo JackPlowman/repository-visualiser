@@ -388,7 +388,7 @@ func pushSVGToBranch(svgContent string) (string, error) {
 	fmt.Println(string(output))
 	fmt.Println(err)
 
-	cmd = exec.Command("echo", "$PWD")
+	cmd = exec.Command("echo", "$CWD")
 	output, err = cmd.CombinedOutput()
 	fmt.Println(string(output))
 	fmt.Println(err)
