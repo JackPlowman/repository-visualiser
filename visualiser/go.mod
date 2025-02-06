@@ -1,4 +1,4 @@
-module github.com/JackPlowman/repository-visualiser
+module github.com/JackPlowman/repository-visualiser/visualiser
 
 go 1.23.5
 
