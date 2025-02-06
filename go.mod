@@ -1,4 +1,4 @@
-module go-test
+module github.com/JackPlowman/repository-visualiser
 
 go 1.23.5
 
