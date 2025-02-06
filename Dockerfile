@@ -7,7 +7,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
-COPY *.go ignore.json ./
+COPY visualiser/*.go visualiser/ignore.json ./
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /application
 
