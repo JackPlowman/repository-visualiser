@@ -357,6 +357,7 @@ func commentOnPR(svgContent string) error {
 		return nil
 	}
 	repoFull := os.Getenv("INPUT_GITHUB_REPOSITORY")
+	fmt.Printf("repoFull: %v\n", repoFull)
 	if repoFull == "" {
 		return errors.New("GITHUB_REPOSITORY not set")
 	}
