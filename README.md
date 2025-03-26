@@ -9,7 +9,7 @@
 
 ## Description
 
-repository-visualiser is a tool designed to developers visualize the structure of the repository. It creates a diagram of the repository's structure, including directories and files, with each file type represented by a different color. The diagram is generated in SVG format, which can be easily viewed in web browsers or vector graphics software.
+`repository-visualiser` is a tool designed for developers to visualize the structure of the repository. It creates a diagram of the repository's structure, including directories and files, with each file type represented by a different color. The diagram is generated in SVG format, which can be easily viewed in web browsers or vector graphics software.
 
 ## Contributing
 
