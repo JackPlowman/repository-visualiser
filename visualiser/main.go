@@ -375,7 +375,7 @@ func commentOnPR(svgContent string) error {
 	client := github.NewClient(tc)
 	encodedSVG := base64.StdEncoding.EncodeToString([]byte(svgContent))
 	comment := &github.IssueComment{
-		Body: github.String(fmt.Sprintf("## Repository Visualiser\n![Diagram](data:image/svg+xml;base64,%s)", encodedSVG)),
+		Body: github.String(fmt.Sprintf("## Repository Visualiser\n![SVG Image](data:image/svg+xml;base64,%s)", encodedSVG)),
 	}
 	_, _, err = client.Issues.CreateComment(ctx, github_repository_owner, github_repository, event.PullRequest.Number, comment)
 	return err
