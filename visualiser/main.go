@@ -356,16 +356,14 @@ func commentOnPR(svgContent string) error {
 	if event.PullRequest.Number == 0 {
 		return nil
 	}
-	repoFull := os.Getenv("INPUT_GITHUB_REPOSITORY")
-	fmt.Printf("repoFull: %v\n", repoFull)
-	if repoFull == "" {
+	github_repository := os.Getenv("INPUT_GITHUB_REPOSITORY")
+	if github_repository == "" {
 		return errors.New("GITHUB_REPOSITORY not set")
 	}
-	parts := strings.Split(repoFull, "/")
-	if len(parts) != 2 {
-		return errors.New("invalid GITHUB_REPOSITORY format")
+	github_repository_owner := os.Getenv("GITHUB_REPOSITORY_OWNER")
+	if github_repository_owner == "" {
+		return errors.New("GITHUB_REPOSITORY_OWNER not set")
 	}
-	owner, repo := parts[0], parts[1]
 	token := os.Getenv("INPUT_GITHUB_TOKEN")
 	if token == "" {
 		return errors.New("GITHUB_TOKEN not set")
@@ -377,6 +375,6 @@ func commentOnPR(svgContent string) error {
 	comment := &github.IssueComment{
 		Body: github.String(fmt.Sprintf("## Repository Visualiser\n![Diagram](data:image/svg+xml;base64,%s)", svgContent)),
 	}
-	_, _, err = client.Issues.CreateComment(ctx, owner, repo, event.PullRequest.Number, comment)
+	_, _, err = client.Issues.CreateComment(ctx, github_repository_owner, github_repository, event.PullRequest.Number, comment)
 	return err
 }

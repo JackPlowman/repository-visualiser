@@ -6,6 +6,9 @@ inputs:
   GITHUB_TOKEN:
     description: "The GitHub token to use for the action"
     required: true
+  GITHUB_REPOSITORY_OWNER:
+    description: "The GitHub repository owner to use for the action"
+    required: true
   GITHUB_REPOSITORY:
     description: "The GitHub repository to use for the action"
     required: true
