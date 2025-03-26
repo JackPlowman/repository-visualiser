@@ -85,8 +85,18 @@ func getFileStats(root string) []FileStat {
 	return stats
 }
 
+func printCurrentDir() {
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error getting current directory:", err)
+		return
+	}
+	fmt.Println("Current directory:", dir)
+}
+
 // Update loadIgnoreList to parse JSON with an "ignore" key.
 func loadIgnoreList() ([]string, error) {
+	printCurrentDir()
 	data, err := os.ReadFile("ignore.json")
 	if err != nil {
 		return nil, err
