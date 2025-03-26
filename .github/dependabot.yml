@@ -4,8 +4,6 @@ updates:
   - package-ecosystem: "github-actions"
     directories:
       - "/"
-    commit-message:
-      prefix: "deps(github-actions)"
     schedule:
       interval: "daily"
       time: "01:00"
@@ -21,8 +19,6 @@ updates:
 
   - package-ecosystem: "docker"
     directory: "/"
-    commit-message:
-      prefix: "deps(dockerfile)"
     schedule:
       interval: "daily"
       time: "01:00"
@@ -31,8 +27,6 @@ updates:
 
   - package-ecosystem: "gomod"
     directory: "/"
-    commit-message:
-      prefix: "deps(go-modules)"
     schedule:
       interval: "daily"
       time: "01:00"
