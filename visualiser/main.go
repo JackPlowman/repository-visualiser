@@ -23,6 +23,10 @@ func main() {
 	fmt.Println(languageCountArray)
 
 	fileStats := getFileStats("/github/workspace")
+	if len(fileStats) == 0 {
+		fmt.Println("No files found.")
+		return
+	}
 	// Apply ignore list filtering.
 	ignoreList, err := loadIgnoreList()
 	if err != nil {
@@ -38,65 +42,15 @@ func main() {
 	if err := commentOnPR(markdownContent); err != nil {
 		fmt.Println("Error commenting on PR:", err)
 	}
-	writeSummary(languageCountArray)
+	writeSummary(languageCountArray, markdownContent)
 }
 
 // writeDiagram writes the SVG output to a file named "diagram.svg".
 func writeDiagram(svgOutput string) {
 	// Write svg locally.
-	err := os.WriteFile("diagram.svg", []byte(svgOutput), 0644)
+	err := os.WriteFile("/github/workspace/repository_visualisation.svg", []byte(svgOutput), 0644)
 	if err != nil {
 		fmt.Println("Error writing SVG file:", err)
-	}
-}
-
-// writeSummary writes the language count array to the GitHub Action summary if available.
-func writeSummary(languageCountArray LanguageCountArray) {
-	actionSummaryPath := os.Getenv("GITHUB_STEP_SUMMARY")
-	if actionSummaryPath != "" {
-		// Separate unknown language count.
-		var unknownCount int
-		var knownCounts LanguageCountArray
-		for _, lc := range languageCountArray {
-			if lc.Language == "Unknown" {
-				unknownCount += lc.Count
-			} else {
-				knownCounts = append(knownCounts, lc)
-			}
-		}
-		// Sort known counts by descending file count.
-		sort.Slice(knownCounts, func(i, j int) bool {
-			return knownCounts[i].Count > knownCounts[j].Count
-		})
-
-		// Build headers and counts.
-		var headers, counts []string
-		for _, lc := range knownCounts {
-			headers = append(headers, lc.Language)
-			counts = append(counts, fmt.Sprintf("%d", lc.Count))
-		}
-		// Append unknown column if found.
-		if unknownCount > 0 {
-			headers = append(headers, "Unknown")
-			counts = append(counts, fmt.Sprintf("%d", unknownCount))
-		}
-
-		file, err := os.OpenFile(actionSummaryPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			fmt.Println("Error:", err)
-			return
-		}
-		defer file.Close()
-
-		var sb strings.Builder
-		// Header row with empty left cell.
-		sb.WriteString("|         | " + strings.Join(headers, " | ") + " |\n")
-		// Separator row.
-		sb.WriteString("|---------|" + strings.Repeat("---------|", len(headers)) + "\n")
-		// Data row with left cell "Files".
-		sb.WriteString("| Files   | " + strings.Join(counts, " | ") + " |\n")
-
-		fmt.Fprintln(file, sb.String())
 	}
 }
 
@@ -133,7 +87,7 @@ func getFileStats(root string) []FileStat {
 
 // Update loadIgnoreList to parse JSON with an "ignore" key.
 func loadIgnoreList() ([]string, error) {
-	data, err := os.ReadFile("ignore.json")
+	data, err := os.ReadFile("./ignore.json")
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +154,7 @@ func generateSVG(stats []FileStat) string {
 		for _, f := range files {
 			sum += f.Lines
 		}
-		r := float64(sum)/10 + 20
+		r := math.Max(float64(sum)/10+20, 10) // Ensure a minimum radius to avoid zero or negative values.
 		allFolders = append(allFolders, folderData{folderPath: folderPath, folderSum: sum, files: files, radius: r})
 	}
 
@@ -242,14 +196,14 @@ func generateSVG(stats []FileStat) string {
 		))
 
 		// Place file circles inside folder.
-		angleStep := 360.0 / float64(len(fd.files)+1)
+		angleStep := 360.0 / math.Max(float64(len(fd.files)), 1) // Avoid division by zero.
 		for i, f := range fd.files {
 			// ...existing code to calculate color, radius, and angle...
 			color := getLanguageColor(f.Path)
 			rad := float64(f.Lines)/10 + 5
 			angle := float64(i) * angleStep
-			fileX := centerX + (fd.radius-25)*cosDeg(angle)
-			fileY := centerY + (fd.radius-25)*sinDeg(angle)
+			fileX := centerX + math.Max(fd.radius-25, 5)*cosDeg(angle) // Ensure valid radius for placement.
+			fileY := centerY + math.Max(fd.radius-25, 5)*sinDeg(angle)
 			// Draw file circle without title.
 			output.WriteString(fmt.Sprintf(
 				`<circle cx="%f" cy="%f" r="%f" fill="%s" />`,
@@ -269,6 +223,7 @@ func generateSVG(stats []FileStat) string {
 	}
 
 	output.WriteString(svgFooter)
+	writeDiagram(output.String())
 	return output.String()
 }
 
@@ -382,4 +337,55 @@ func commentOnPR(markdownContent string) error {
 	}
 	_, _, err = client.Issues.CreateComment(ctx, github_repository_owner, github_repository, event.PullRequest.Number, comment)
 	return err
+}
+
+// writeSummary writes the language count array to the GitHub Action summary if available.
+func writeSummary(languageCountArray LanguageCountArray, markdownContent string) {
+	actionSummaryPath := os.Getenv("GITHUB_STEP_SUMMARY")
+	if actionSummaryPath != "" {
+		// Separate unknown language count.
+		var unknownCount int
+		var knownCounts LanguageCountArray
+		for _, lc := range languageCountArray {
+			if lc.Language == "Unknown" {
+				unknownCount += lc.Count
+			} else {
+				knownCounts = append(knownCounts, lc)
+			}
+		}
+		// Sort known counts by descending file count.
+		sort.Slice(knownCounts, func(i, j int) bool {
+			return knownCounts[i].Count > knownCounts[j].Count
+		})
+
+		// Build headers and counts.
+		var headers, counts []string
+		for _, lc := range knownCounts {
+			headers = append(headers, lc.Language)
+			counts = append(counts, fmt.Sprintf("%d", lc.Count))
+		}
+		// Append unknown column if found.
+		if unknownCount > 0 {
+			headers = append(headers, "Unknown")
+			counts = append(counts, fmt.Sprintf("%d", unknownCount))
+		}
+
+		file, err := os.OpenFile(actionSummaryPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+		defer file.Close()
+
+		var sb strings.Builder
+		sb.WriteString(fmt.Sprintf("%s\n", markdownContent))
+		// Header row with empty left cell.
+		sb.WriteString("|         | " + strings.Join(headers, " | ") + " |\n")
+		// Separator row.
+		sb.WriteString("|---------|" + strings.Repeat("---------|", len(headers)) + "\n")
+		// Data row with left cell "Files".
+		sb.WriteString("| Files   | " + strings.Join(counts, " | ") + " |\n")
+
+		fmt.Fprintln(file, sb.String())
+	}
 }
