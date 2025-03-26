@@ -32,6 +32,8 @@ func main() {
 	}
 	svgOutput := generateSVG(fileStats)
 
+	markdownContent := generateMarkdownContent(svgOutput)
+
 	// Post PR comment with SVG image.
 	if err := commentOnPR(svgOutput); err != nil {
 		fmt.Println("Error commenting on PR:", err)
@@ -331,8 +333,14 @@ func mapToLanguageCountArray(languageCountMap map[string]int) LanguageCountArray
 	return languageCountArray
 }
 
+// generateMarkdownContent generates a Markdown string with the SVG image.
+func generateMarkdownContent(svgContent string) string {
+	encodedSVG := base64.StdEncoding.EncodeToString([]byte(svgContent))
+	return fmt.Sprintf("## Repository Visualiser\n![SVG Image](data:image/svg+xml;base64,%s)", encodedSVG)
+}
+
 // Updated commentOnPR using go-github.
-func commentOnPR(svgContent string) error {
+func commentOnPR(markdownContent string) error {
 	eventPath := os.Getenv("GITHUB_EVENT_PATH")
 	if eventPath == "" {
 		return nil // Not running in a GitHub Actions event.
@@ -368,9 +376,9 @@ func commentOnPR(svgContent string) error {
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
-	encodedSVG := base64.StdEncoding.EncodeToString([]byte(svgContent))
+
 	comment := &github.IssueComment{
-		Body: github.String(fmt.Sprintf("## Repository Visualiser\n![SVG Image](data:image/svg+xml;base64,%s)", encodedSVG)),
+		Body: github.String(markdownContent),
 	}
 	_, _, err = client.Issues.CreateComment(ctx, github_repository_owner, github_repository, event.PullRequest.Number, comment)
 	return err
