@@ -28,12 +28,7 @@ func main() {
 		return
 	}
 	// Apply ignore list filtering.
-	ignoreList, err := loadIgnoreList()
-	if err != nil {
-		fmt.Println("Error loading ignore list:", err)
-	} else {
-		fileStats = filterIgnoredFiles(fileStats, ignoreList)
-	}
+	fileStats = filterIgnoredFiles(fileStats, defaultIgnoreList)
 	svgOutput := generateSVG(fileStats)
 
 	markdownContent := generateMarkdownContent(svgOutput)
@@ -83,21 +78,6 @@ func getFileStats(root string) []FileStat {
 		return nil
 	})
 	return stats
-}
-
-// Update loadIgnoreList to parse JSON with an "ignore" key.
-func loadIgnoreList() ([]string, error) {
-	data, err := os.ReadFile("./ignore.json")
-	if err != nil {
-		return nil, err
-	}
-	var config struct {
-		Ignore []string `json:"ignore"`
-	}
-	if err := json.Unmarshal(data, &config); err != nil {
-		return nil, err
-	}
-	return config.Ignore, nil
 }
 
 // filterIgnoredFiles filters out FileStat entries whose Path matches any pattern in the ignore list.
