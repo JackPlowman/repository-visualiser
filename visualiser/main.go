@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -372,8 +373,9 @@ func commentOnPR(svgContent string) error {
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
+	encodedSVG := base64.StdEncoding.EncodeToString([]byte(svgContent))
 	comment := &github.IssueComment{
-		Body: github.String(fmt.Sprintf("## Repository Visualiser\n![Diagram](data:image/svg+xml;base64,%s)", svgContent)),
+		Body: github.String(fmt.Sprintf("## Repository Visualiser\n![Diagram](data:image/svg+xml;base64,%s)", encodedSVG)),
 	}
 	_, _, err = client.Issues.CreateComment(ctx, github_repository_owner, github_repository, event.PullRequest.Number, comment)
 	return err
