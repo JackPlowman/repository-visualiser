@@ -219,6 +219,7 @@ func generateSVG(stats []FileStat) string {
 	}
 
 	output.WriteString(svgFooter)
+	writeDiagram(output.String())
 	return output.String()
 }
 
