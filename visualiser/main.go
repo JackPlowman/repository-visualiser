@@ -23,6 +23,10 @@ func main() {
 	fmt.Println(languageCountArray)
 
 	fileStats := getFileStats("/github/workspace")
+	if len(fileStats) == 0 {
+		fmt.Println("No files found.")
+		return
+	}
 	// Apply ignore list filtering.
 	ignoreList, err := loadIgnoreList()
 	if err != nil {
@@ -44,7 +48,7 @@ func main() {
 // writeDiagram writes the SVG output to a file named "diagram.svg".
 func writeDiagram(svgOutput string) {
 	// Write svg locally.
-	err := os.WriteFile("diagram.svg", []byte(svgOutput), 0644)
+	err := os.WriteFile("/github/workspace/repository_visualisation.svg", []byte(svgOutput), 0644)
 	if err != nil {
 		fmt.Println("Error writing SVG file:", err)
 	}
@@ -150,7 +154,7 @@ func generateSVG(stats []FileStat) string {
 		for _, f := range files {
 			sum += f.Lines
 		}
-		r := float64(sum)/10 + 20
+		r := math.Max(float64(sum)/10+20, 10) // Ensure a minimum radius to avoid zero or negative values.
 		allFolders = append(allFolders, folderData{folderPath: folderPath, folderSum: sum, files: files, radius: r})
 	}
 
@@ -192,14 +196,14 @@ func generateSVG(stats []FileStat) string {
 		))
 
 		// Place file circles inside folder.
-		angleStep := 360.0 / float64(len(fd.files)+1)
+		angleStep := 360.0 / math.Max(float64(len(fd.files)), 1) // Avoid division by zero.
 		for i, f := range fd.files {
 			// ...existing code to calculate color, radius, and angle...
 			color := getLanguageColor(f.Path)
 			rad := float64(f.Lines)/10 + 5
 			angle := float64(i) * angleStep
-			fileX := centerX + (fd.radius-25)*cosDeg(angle)
-			fileY := centerY + (fd.radius-25)*sinDeg(angle)
+			fileX := centerX + math.Max(fd.radius-25, 5)*cosDeg(angle) // Ensure valid radius for placement.
+			fileY := centerY + math.Max(fd.radius-25, 5)*sinDeg(angle)
 			// Draw file circle without title.
 			output.WriteString(fmt.Sprintf(
 				`<circle cx="%f" cy="%f" r="%f" fill="%s" />`,
