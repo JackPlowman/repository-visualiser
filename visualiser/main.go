@@ -50,57 +50,6 @@ func writeDiagram(svgOutput string) {
 	}
 }
 
-// writeSummary writes the language count array to the GitHub Action summary if available.
-func writeSummary(languageCountArray LanguageCountArray, markdownContent string) {
-	actionSummaryPath := os.Getenv("GITHUB_STEP_SUMMARY")
-	if actionSummaryPath != "" {
-		// Separate unknown language count.
-		var unknownCount int
-		var knownCounts LanguageCountArray
-		for _, lc := range languageCountArray {
-			if lc.Language == "Unknown" {
-				unknownCount += lc.Count
-			} else {
-				knownCounts = append(knownCounts, lc)
-			}
-		}
-		// Sort known counts by descending file count.
-		sort.Slice(knownCounts, func(i, j int) bool {
-			return knownCounts[i].Count > knownCounts[j].Count
-		})
-
-		// Build headers and counts.
-		var headers, counts []string
-		for _, lc := range knownCounts {
-			headers = append(headers, lc.Language)
-			counts = append(counts, fmt.Sprintf("%d", lc.Count))
-		}
-		// Append unknown column if found.
-		if unknownCount > 0 {
-			headers = append(headers, "Unknown")
-			counts = append(counts, fmt.Sprintf("%d", unknownCount))
-		}
-
-		file, err := os.OpenFile(actionSummaryPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			fmt.Println("Error:", err)
-			return
-		}
-		defer file.Close()
-
-		var sb strings.Builder
-		sb.WriteString(markdownContent)
-		// Header row with empty left cell.
-		sb.WriteString("|         | " + strings.Join(headers, " | ") + " |\n")
-		// Separator row.
-		sb.WriteString("|---------|" + strings.Repeat("---------|", len(headers)) + "\n")
-		// Data row with left cell "Files".
-		sb.WriteString("| Files   | " + strings.Join(counts, " | ") + " |\n")
-
-		fmt.Fprintln(file, sb.String())
-	}
-}
-
 type LanguageCount struct {
 	Language string
 	Count    int
@@ -383,4 +332,55 @@ func commentOnPR(markdownContent string) error {
 	}
 	_, _, err = client.Issues.CreateComment(ctx, github_repository_owner, github_repository, event.PullRequest.Number, comment)
 	return err
+}
+
+// writeSummary writes the language count array to the GitHub Action summary if available.
+func writeSummary(languageCountArray LanguageCountArray, markdownContent string) {
+	actionSummaryPath := os.Getenv("GITHUB_STEP_SUMMARY")
+	if actionSummaryPath != "" {
+		// Separate unknown language count.
+		var unknownCount int
+		var knownCounts LanguageCountArray
+		for _, lc := range languageCountArray {
+			if lc.Language == "Unknown" {
+				unknownCount += lc.Count
+			} else {
+				knownCounts = append(knownCounts, lc)
+			}
+		}
+		// Sort known counts by descending file count.
+		sort.Slice(knownCounts, func(i, j int) bool {
+			return knownCounts[i].Count > knownCounts[j].Count
+		})
+
+		// Build headers and counts.
+		var headers, counts []string
+		for _, lc := range knownCounts {
+			headers = append(headers, lc.Language)
+			counts = append(counts, fmt.Sprintf("%d", lc.Count))
+		}
+		// Append unknown column if found.
+		if unknownCount > 0 {
+			headers = append(headers, "Unknown")
+			counts = append(counts, fmt.Sprintf("%d", unknownCount))
+		}
+
+		file, err := os.OpenFile(actionSummaryPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+		defer file.Close()
+
+		var sb strings.Builder
+		sb.WriteString(fmt.Sprintf("%s\n", markdownContent))
+		// Header row with empty left cell.
+		sb.WriteString("|         | " + strings.Join(headers, " | ") + " |\n")
+		// Separator row.
+		sb.WriteString("|---------|" + strings.Repeat("---------|", len(headers)) + "\n")
+		// Data row with left cell "Files".
+		sb.WriteString("| Files   | " + strings.Join(counts, " | ") + " |\n")
+
+		fmt.Fprintln(file, sb.String())
+	}
 }
