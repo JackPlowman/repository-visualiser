@@ -115,21 +115,25 @@ jobs:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
     permissions:
+      statuses: write
       security-events: write
+    strategy:
+      matrix:
+        language: [go, actions]
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4.2.2
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3.28.10
+        uses: github/codeql-action/init@v3.28.13
         with:
-          languages: actions
+          languages: ${{ matrix.language }}
           queries: security-and-quality
           config-file: .github/other-configurations/codeql-config.yml
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3.28.10
+        uses: github/codeql-action/analyze@v3.28.13
 
   repository-visualiser:
     name: Repository Visualiser
