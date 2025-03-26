@@ -38,7 +38,7 @@ func main() {
 	if err := commentOnPR(markdownContent); err != nil {
 		fmt.Println("Error commenting on PR:", err)
 	}
-	writeSummary(languageCountArray)
+	writeSummary(languageCountArray, markdownContent)
 }
 
 // writeDiagram writes the SVG output to a file named "diagram.svg".
