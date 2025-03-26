@@ -35,7 +35,7 @@ func main() {
 	markdownContent := generateMarkdownContent(svgOutput)
 
 	// Post PR comment with SVG image.
-	if err := commentOnPR(svgOutput); err != nil {
+	if err := commentOnPR(markdownContent); err != nil {
 		fmt.Println("Error commenting on PR:", err)
 	}
 	writeSummary(languageCountArray)
