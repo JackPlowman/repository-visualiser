@@ -24,20 +24,15 @@ func main() {
 
 	fileStats := getFileStats("/github/workspace")
 	// Apply ignore list filtering.
-	// ignoreList, err := loadIgnoreList()
-	// if err != nil {
-	// 	fmt.Println("Error loading ignore list:", err)
-	// } else {
-	// 	fileStats = filterIgnoredFiles(fileStats, ignoreList)
-	// }
+	ignoreList, err := loadIgnoreList()
+	if err != nil {
+		fmt.Println("Error loading ignore list:", err)
+	} else {
+		fileStats = filterIgnoredFiles(fileStats, ignoreList)
+	}
 	svgOutput := generateSVG(fileStats)
 
-	// // Push the SVG to branch "repository-visualiser" in a commit-hash directory.
-	// svgURL, err := pushSVGToBranch(svgOutput)
-	// if err != nil {
-	// 	fmt.Println("Error pushing SVG:", err)
-	// }
-	// Post PR comment with link to the SVG if running in a pull request.
+	// Post PR comment with SVG image.
 	if err := commentOnPR(svgOutput); err != nil {
 		fmt.Println("Error commenting on PR:", err)
 	}
