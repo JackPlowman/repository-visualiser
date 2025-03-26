@@ -87,7 +87,7 @@ func getFileStats(root string) []FileStat {
 
 // Update loadIgnoreList to parse JSON with an "ignore" key.
 func loadIgnoreList() ([]string, error) {
-	data, err := os.ReadFile("../../ignore.json")
+	data, err := os.ReadFile("./ignore.json")
 	if err != nil {
 		return nil, err
 	}
