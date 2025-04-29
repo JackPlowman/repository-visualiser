@@ -355,7 +355,11 @@ func writeSummary(languageCountArray LanguageCountArray, markdownContent string)
 			fmt.Println("Error:", err)
 			return
 		}
-		defer file.Close()
+		defer func() {
+			if err := file.Close(); err != nil {
+				fmt.Println("Error closing file:", err)
+			}
+		}()
 
 		var sb strings.Builder
 		sb.WriteString(fmt.Sprintf("%s\n", markdownContent))
