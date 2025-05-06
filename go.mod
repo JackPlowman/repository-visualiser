@@ -5,7 +5,7 @@ go 1.24.1
 require (
 	github.com/go-enry/go-enry/v2 v2.9.2
 	github.com/google/go-github/v48 v48.2.0
-	golang.org/x/oauth2 v0.28.0
+	golang.org/x/oauth2 v0.30.0
 )
 
 require (
