@@ -2,16 +2,19 @@ version: 2
 
 updates:
   - package-ecosystem: "github-actions"
-    directories:
-      - "/"
+    directory: "/"
     schedule:
       interval: "cron"
       cronjob: "30 7 * * *"
+      timezone: "Europe/London"
     target-branch: "main"
     groups:
       github-actions:
+        applies-to: "version-updates"
         patterns:
           - "*"
+        exclude-patterns:
+          - "super-linter/*"
         update-types:
           - "patch"
           - "minor"
@@ -21,6 +24,7 @@ updates:
     schedule:
       interval: "cron"
       cronjob: "30 7 * * *"
+      timezone: "Europe/London"
     target-branch: "main"
 
   - package-ecosystem: "gomod"
@@ -28,4 +32,13 @@ updates:
     schedule:
       interval: "cron"
       cronjob: "30 7 * * *"
+      timezone: "Europe/London"
     target-branch: "main"
+    groups:
+      go-modules:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+          - "minor"
