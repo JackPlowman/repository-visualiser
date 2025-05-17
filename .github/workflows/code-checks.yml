@@ -35,80 +35,15 @@ jobs:
           VALIDATE_GO: false
           VALIDATE_GO_MODULES: false
 
-  check-markdown-links:
-    name: Check Markdown links
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4.2.2
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Check Markdown links
-        uses: UmbrellaDocs/action-linkspector@a0567ce1c7c13de4a2358587492ed43cab5d0102 # v1.3.4
-        with:
-          github_token: ${{ secrets.GH_TOKEN }}
-          config_file: .github/other-configurations/.linkspector.yml
-          reporter: github-pr-review
-          fail_on_error: true
-          filter_mode: nofilter
-          show_stats: true
-
-  check-justfile-format:
-    name: Check Justfile Format
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4.2.2
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Set up Just
-        uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
-      - name: Check Justfile Format
-        run: just format-check
-
-  lefthook-validate:
-    name: Lefthook Validate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4.2.2
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca # v6.0.1
-        with:
-          version: "latest"
-      - name: Run Lefthook Validate
-        run: uvx lefthook validate
-
-  run-zizmor:
-    name: Check GitHub Actions with zizmor
-    runs-on: ubuntu-latest
+  common-code-checks:
+    name: Common Code Checks
     permissions:
+      contents: read
+      pull-requests: read
       security-events: write
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4.2.2
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca # v6.0.1
-      - name: Set up Just
-        uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3
-      - name: Run zizmor 🌈
-        run: just zizmor-check-sarif
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3.28.17
-        with:
-          sarif_file: results.sarif
-          category: zizmor
-
+    uses: JackPlowman/reusable-workflows/.github/workflows/common-code-checks.yml@14445779094fde883fdb9f65946fcae6c25f46c0 # v2025.05.14.01
+    secrets:
+      workflow_github_token: ${{ secrets.GITHUB_TOKEN }}
   run-codeql-analysis:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
