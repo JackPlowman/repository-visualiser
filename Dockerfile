@@ -1,6 +1,6 @@
 #checkov:skip=CKV_DOCKER_2
 #checkov:skip=CKV_DOCKER_3
-FROM golang:1.24.1-bookworm
+FROM golang:1.25.0-bookworm
 
 WORKDIR /app
 
