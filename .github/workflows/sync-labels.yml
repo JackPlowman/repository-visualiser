@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - .github/other-configurations/labels.yml
+      - .github/tool-configurations/labels.yml
   workflow_dispatch:
 
 permissions: {}
@@ -16,6 +16,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: JackPlowman/reusable-workflows/.github/workflows/common-sync-labels.yml@9aeb375514588fbc71eae2823e3216d43d300501 # v2025.06.16.01
+    uses: JackPlowman/reusable-workflows/.github/workflows/common-sync-labels.yml@639c12c2577f6827f84007833ac49fb62ddd0e68 # v2025.08.28.01
     secrets:
       workflow_github_token: ${{ secrets.GITHUB_TOKEN }}
