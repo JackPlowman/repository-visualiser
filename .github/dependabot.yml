@@ -18,6 +18,8 @@ updates:
         update-types:
           - "patch"
           - "minor"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "docker"
     directory: "/"
@@ -26,6 +28,8 @@ updates:
       cronjob: "30 7 * * *"
       timezone: "Europe/London"
     target-branch: "main"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "gomod"
     directory: "/"
@@ -42,3 +46,5 @@ updates:
         update-types:
           - "patch"
           - "minor"
+    cooldown:
+      default-days: 7
