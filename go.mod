@@ -11,5 +11,5 @@ require (
 require (
 	github.com/go-enry/go-oniguruma v1.2.1 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
-	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
 )
