@@ -13,8 +13,7 @@ import (
 	"strings"
 
 	"github.com/go-enry/go-enry/v2"
-	"github.com/google/go-github/v48/github"
-	"golang.org/x/oauth2"
+	"github.com/google/go-github/v93/github"
 )
 
 // main is the entry point of the application.
@@ -299,7 +298,7 @@ func commentOnPR(markdownContent string) error {
 	if github_repository == "" {
 		return errors.New("GITHUB_REPOSITORY not set")
 	}
-	github_repository_owner := os.Getenv("GITHUB_REPOSITORY_OWNER")
+	github_repository_owner := os.Getenv("INPUT_GITHUB_REPOSITORY_OWNER")
 	if github_repository_owner == "" {
 		return errors.New("GITHUB_REPOSITORY_OWNER not set")
 	}
@@ -308,14 +307,15 @@ func commentOnPR(markdownContent string) error {
 		return errors.New("GITHUB_TOKEN not set")
 	}
 	ctx := context.Background()
-	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
-	tc := oauth2.NewClient(ctx, ts)
-	client := github.NewClient(tc)
-
-	comment := &github.IssueComment{
-		Body: github.String(markdownContent),
+	client, err := github.NewClient(github.WithAuthToken(token))
+	if err != nil {
+		return err
 	}
-	_, _, err = client.Issues.CreateComment(ctx, github_repository_owner, github_repository, event.PullRequest.Number, comment)
+
+	comment := &github.IssueCommentRequest{
+		Body: markdownContent,
+	}
+	_, _, err = client.Issues.CreateComment(ctx, github_repository_owner, github_repository, event.PullRequest.Number, *comment)
 	return err
 }
 
