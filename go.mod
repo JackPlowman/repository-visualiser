@@ -1,6 +1,6 @@
 module github.com/JackPlowman/repository-visualiser
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/go-enry/go-enry/v2 v2.9.6
