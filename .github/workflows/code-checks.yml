@@ -15,6 +15,10 @@ permissions:
 env:
   FORCE_COLOR: 1
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   go-checks:
     name: Go Tests and Vulnerabilities
@@ -71,7 +75,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Run Repository Visualiser
-        uses: ./
+        uses: $/
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}

@@ -15,7 +15,7 @@ inputs:
 
 runs:
   using: "docker"
-  image: "./Dockerfile"
+  image: "Dockerfile"
   env:
     GITHUB_ACTION: "true"
     GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
