@@ -4,38 +4,61 @@ on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened, ready_for_review]
   schedule:
     - cron: "0 0 * * *"
 
 permissions:
-  contents: read
-  packages: read
+  contents: read # to check out repository files
+  packages: read # to inspect package metadata
 
 env:
   FORCE_COLOR: 1
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
+  go-checks:
+    name: Go Tests and Vulnerabilities
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: Test and vet
+        run: |
+          go test ./...
+          go vet ./...
+      - name: Check Go vulnerabilities
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+
   common-code-checks:
     name: Common Code Checks
     permissions:
-      contents: read
-      actions: read
-      pull-requests: write
-      security-events: write
-    uses: JackPlowman/reusable-workflows/.github/workflows/common-code-checks.yml@7266b1a2cebc5ac940b8a767ff040c846275fcf0 # v2025.10.15.01
+      contents: read # to check out repository files
+      actions: read # to inspect workflow runs
+      pull-requests: write # to label pull requests and publish review results
+      security-events: write # to upload security scan results
+    uses: JackPlowman/reusable-workflows/.github/workflows/common-code-checks.yml@f82d61d53648ae90f8a0406c0f4bbf1aef332337 # v2026.10.25.01
     secrets:
       workflow_github_token: ${{ secrets.GITHUB_TOKEN }}
 
   codeql-checks:
     name: CodeQL Analysis
     permissions:
-      contents: read
-      security-events: write
+      contents: read # to check out repository files
+      security-events: write # to upload security scan results
     strategy:
       matrix:
         language: [actions, go]
-    uses: JackPlowman/reusable-workflows/.github/workflows/codeql-analysis.yml@7266b1a2cebc5ac940b8a767ff040c846275fcf0 # v2025.10.15.01
+    uses: JackPlowman/reusable-workflows/.github/workflows/codeql-analysis.yml@f82d61d53648ae90f8a0406c0f4bbf1aef332337 # v2026.10.25.01
     with:
       language: ${{ matrix.language }}
 
@@ -43,22 +66,22 @@ jobs:
     name: Repository Visualiser
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read # to check out repository files
+      pull-requests: write # to label pull requests and publish review results
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Run Repository Visualiser
-        uses: ./
+        uses: $/
         with:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GITHUB_REPOSITORY: ${{ github.event.repository.name }}
       - name: Upload Diagram
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: repository_visualisation.svg
           path: repository_visualisation.svg
